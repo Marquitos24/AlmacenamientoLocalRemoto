@@ -1,4 +1,6 @@
-﻿namespace ServiceRemote.Dto;
+﻿using System;
+
+namespace ServiceRemote.Dto;
 
 public class UserDto
 {
@@ -7,7 +9,7 @@ public class UserDto
     public string UserName { get; set; }
     public string Email { get; set; }
     public DateTime CreateAt { get; set; }
-    public DateTime UppdateAt { get; set; }
+    public DateTime UpdateAt { get; set; }
     public bool IsDelete { get; set; }
-    public DateTime DeleteAt { get; set; }
+    public DateTime? DeleteAt { get; set; }
 }

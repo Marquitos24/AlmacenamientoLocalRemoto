@@ -12,6 +12,7 @@
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12"/>
         <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.12" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="11.0.0-rc.1.26425.128" />
+        <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="10.0.12" />
         <PackageReference Include="Moq" Version="4.21.0" />
         <PackageReference Include="NUnit" Version="5.0.0" />
         <PackageReference Include="Refit" Version="16.3.0" />
@@ -20,6 +21,7 @@
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
         <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
         <PackageReference Include="Serilog.Sinks.File" Version="8.0.0-nblumhardt-02322" />
+        <PackageReference Include="StackExchange.Redis" Version="3.3.1" />
         <PackageReference Include="System.Reactive" Version="7.0.0" />
     </ItemGroup>
 
