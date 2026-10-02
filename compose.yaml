@@ -1,0 +1,7 @@
+﻿services:
+  webapplication1.test:
+    image: webapplication1.test
+    build:
+      context: .
+      dockerfile: WebApplication1.Test/Dockerfile
+
