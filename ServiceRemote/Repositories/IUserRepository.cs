@@ -1,8 +1,8 @@
-﻿using ServiceRemote.Models;
+﻿using ServiceRemote.Entity;
 
 namespace ServiceRemote.Repositories;
 
-public interface IUserRepository : ICrudRepository<User>
+public interface IUserRepository: ICrudRepository<UserEntity>
 {
     
 }
