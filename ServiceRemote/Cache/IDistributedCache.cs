@@ -29,9 +29,4 @@ public interface IDistributedCache
     /// <param name="key">Clave del valor a eliminar.</param>
     /// <returns></returns>
     Task RemoveAsync(string key);
-
-    /// <summary>
-    /// Elimina todos los valores de la caché distribuida.
-    /// </summary>
-    Task RemoveAllAsync();
 }

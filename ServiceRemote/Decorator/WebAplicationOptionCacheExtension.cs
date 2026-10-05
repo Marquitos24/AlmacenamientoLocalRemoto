@@ -16,7 +16,7 @@ public static class WebAplicationOptionCacheExtension
         {
             app.Services.AddStackExchangeRedisCache(options =>
             {
-                options.Configuration = "localhost:6379";
+                options.Configuration = ConfigRedis.ConnectionString;
                 options.InstanceName = "UsersCache_";
             });
         }
