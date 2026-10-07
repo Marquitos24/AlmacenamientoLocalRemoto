@@ -11,20 +11,22 @@ public class UserEntity
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
-    [Required]
+    [Required (ErrorMessage =  "El nombre es obligatorio")]
     [Column("name")]
-    [MaxLength(100)]
+    [MaxLength(100, ErrorMessage = "El nombre no puede tener más de 100 caracteres")]
+    [MinLength(1, ErrorMessage = "El nombre no puede tener menos de 1 caracter")]
     public string Name { get; set; } = "";
 
     [Required]
     [Column("userName")]
-    [MaxLength(150)]
+    [MaxLength(150, ErrorMessage = "El nombre no puede tener más de 150 caracteres")]
+    [MinLength(1, ErrorMessage = "El nombre no puede tener menos de 1 caracter")]
     public string UserName { get; set; } = "";
 
     [Required]
     [EmailAddress]
     [Column("email")]
-    [MaxLength(200)]
+    [MaxLength(200, ErrorMessage = "El Email no puede tener más de 200 caracteres")]
     public string Email { get; set; } = "";
     
     [Column("created_at")]

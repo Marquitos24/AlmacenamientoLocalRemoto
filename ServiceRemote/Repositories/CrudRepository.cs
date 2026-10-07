@@ -17,7 +17,7 @@ public class CrudRepository<T>(AppDbContext context) : ICrudRepository<T> where 
         return await context.Set<T>().FindAsync(id);
     }
 
-    public async Task<T> AddAsync(T entity)
+    public async Task<T> CreateAsync(T entity)
     {
         await context.AddAsync(entity);
         await context.SaveChangesAsync();
