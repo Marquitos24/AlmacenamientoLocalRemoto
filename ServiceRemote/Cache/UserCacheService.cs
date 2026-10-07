@@ -5,9 +5,9 @@ using ServiceRemote.Models;
 
 namespace ServiceRemote.Cache;
 
-public class UserCacheService() : IUserCache
+public class UserCacheService : IUserCache
 {
-    public UserCacheService(Microsoft.Extensions.Caching.Distributed.IDistributedCache cache, IUserCacheKeyProvider? keyProvider = null) : this()
+    public UserCacheService(Microsoft.Extensions.Caching.Distributed.IDistributedCache cache, IUserCacheKeyProvider? keyProvider = null)
     {
         _cache = cache;
         _keyProvider = keyProvider ?? new RedisUserCacheKeyProvider();
@@ -27,7 +27,6 @@ public class UserCacheService() : IUserCache
     /// <inheritdoc/>
     public async Task SetAsync(User user)
     {
-        string json = JsonSerializer.Serialize(user);
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(user));
         await _cache.SetAsync(
             $"user:{user.Id}",

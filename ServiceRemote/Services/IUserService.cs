@@ -1,6 +1,9 @@
-﻿namespace ServiceRemote.Services;
+﻿using ServiceRemote.Dto;
+using ServiceRemote.Errors;
 
-public interface IUserService
-{
-    
-}
+namespace ServiceRemote.Services;
+
+/// <summary>
+/// Implementacion de la interfaz IService para usuarios
+/// </summary>
+public interface IUserService : IService<UserResponseDto, int , UserCreateDto, UserUpdateDto, UserDomainError > {}
