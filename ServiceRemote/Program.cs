@@ -2,12 +2,12 @@ using Microsoft.EntityFrameworkCore;
 using ServiceRemote.Entity;
 
 var builder = WebApplication.CreateBuilder(args);
-
+var app = builder.Build();
 
 // PostgreSQL
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("PostgreSQL")));
 
-var app = builder.Build();
+
 builder.Services.AddMemoryCache();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

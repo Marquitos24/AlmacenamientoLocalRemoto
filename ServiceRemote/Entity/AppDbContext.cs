@@ -11,8 +11,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         // reglas que no se describen directamente en el entity
         modelBuilder.Entity<UserEntity>(entity =>
         {
-            entity.HasKey(p => p.Id);
-            
             // ambos atributos son unicos
             entity.HasIndex(p => p.UserName).IsUnique();
             entity.HasIndex(p => p.Email).IsUnique();
