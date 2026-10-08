@@ -36,16 +36,6 @@ public static class UserDtoExtensionMapper
 
 public static class UserCreateDtoExtensionMapper
 {
-    public static UserCreateDto ToDto(this User user)
-    {
-        return new UserCreateDto
-        {
-            Id = user.Id,
-            Name = user.Name,
-            UserName = user.UserName,
-            Email = user.Email,
-        };
-    }
     public static User ToModel(this Dto.UserCreateDto dto)
     {
         return new User
@@ -64,17 +54,7 @@ public static class UserCreateDtoExtensionMapper
 
 public static class UserUpdateDtoExtensionMapper
 {
-    public static UserUpdateDto ToDto(this User user)
-    {
-        return new UserUpdateDto
-        {
-            Id = user.Id,
-            Name = user.Name,
-            UserName = user.UserName,
-            Email = user.Email,
-        };
-    }
-    public static User ToModel(this Dto.UserUpdateDto dto)
+    public static User ToModel(this UserUpdateDto dto)
     {
         return new User
         {
