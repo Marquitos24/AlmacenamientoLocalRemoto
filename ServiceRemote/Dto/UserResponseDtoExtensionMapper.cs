@@ -40,7 +40,6 @@ public static class UserCreateDtoExtensionMapper
     {
         return new UserCreateDto
         {
-            Id = user.Id,
             Name = user.Name,
             UserName = user.UserName,
             Email = user.Email,
@@ -50,7 +49,6 @@ public static class UserCreateDtoExtensionMapper
     {
         return new User
         {
-            Id = dto.Id,
             Name = dto.Name,
             UserName = dto.UserName,
             Email = dto.Email,

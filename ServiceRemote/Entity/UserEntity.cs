@@ -17,13 +17,13 @@ public class UserEntity
     [MinLength(1, ErrorMessage = "El nombre no puede tener menos de 1 caracter")]
     public string Name { get; set; } = "";
 
-    [Required]
+    [Required (ErrorMessage =  "El nombre de usuario es obligatorio")]
     [Column("userName")]
-    [MaxLength(150, ErrorMessage = "El nombre no puede tener más de 150 caracteres")]
-    [MinLength(1, ErrorMessage = "El nombre no puede tener menos de 1 caracter")]
+    [MaxLength(150, ErrorMessage = "El nombre de usuario no puede tener más de 150 caracteres")]
+    [MinLength(1, ErrorMessage = "El nombre de usuario no puede tener menos de 1 caracter")]
     public string UserName { get; set; } = "";
 
-    [Required]
+    [Required (ErrorMessage =  "El Email es obligatorio")]
     [EmailAddress]
     [Column("email")]
     [MaxLength(200, ErrorMessage = "El Email no puede tener más de 200 caracteres")]

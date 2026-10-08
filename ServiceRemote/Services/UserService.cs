@@ -51,7 +51,7 @@ public class UserService : IUserService
     }
 
     /// <inehritdoc />
-    public Task<Result<IEnumerable<UserResponseDto>, UserDomainError>> Delete(int id)
+    public Task<UnitResult<UserDomainError>> Delete(int id)
     {
         throw new NotImplementedException();
     }

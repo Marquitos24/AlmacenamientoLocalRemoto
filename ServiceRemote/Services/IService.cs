@@ -51,5 +51,5 @@ public interface IService<TDto, TId, TCreateDto, TUpdateDto,TDomainError>
     /// </summary>
     /// <param name="id">El id del usuario a eliminar</param>
     /// <returns> Devuelve la lista de usuarios actualizada o un error de dominio </returns>
-    Task<Result <IEnumerable<TDto>, TDomainError>> Delete(TId id);
+    Task<UnitResult <TDomainError>> Delete(TId id);
 }
