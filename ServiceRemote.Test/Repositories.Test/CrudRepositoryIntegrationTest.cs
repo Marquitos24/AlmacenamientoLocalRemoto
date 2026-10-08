@@ -6,7 +6,7 @@ using ServiceRemote.Entity;
 using FluentAssertions;
 using Npgsql;
 
-namespace ServiceRemote.Test.Repositories;
+namespace ServiceRemote.Test.Repositories.Test;
 
 [TestFixture]
 public class CrudRepositoryIntegrationTest
