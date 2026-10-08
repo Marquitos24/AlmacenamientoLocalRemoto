@@ -6,7 +6,7 @@ El objetivo principal es separar las responsabilidades de cada parte de la aplic
 
 ---
 
-## 📋 Índice
+## Índice
 
 - [Descripción](#-descripción)
 - [Arquitectura](#-arquitectura)
@@ -38,7 +38,7 @@ El objetivo principal es separar las responsabilidades de cada parte de la aplic
 
 ---
 
-# 📖 Descripción
+# Descripción
 
 `ServiceRemote` es un servicio web que permite realizar operaciones CRUD sobre usuarios.
 
@@ -52,9 +52,9 @@ Además, dispone de:
 
 - DTOs para separar los datos de entrada y salida.
 - Mappers para transformar objetos entre capas.
-- Repositorio genérico para las operaciones CRUD.
+- Repositorio genérico para las operaciones CRUD y especifico (para probar si se puede con ambos) .
 - Servicio encargado de la lógica de negocio.
-- Gestión de errores mediante `Result<T, TError>`.
+- Gestión de errores de dominio mediante `Result<T, TError>`.
 - Validación de datos.
 - Sistema de notificaciones basado en programación reactiva.
 - Sincronización periódica con la API externa.
@@ -64,7 +64,7 @@ Además, dispone de:
 
 ---
 
-# 🏗️ Arquitectura
+# Arquitectura
 
 La aplicación utiliza una arquitectura por capas en la que cada directorio tiene una responsabilidad concreta.
 
@@ -90,7 +90,7 @@ La aplicación utiliza una arquitectura por capas en la que cada directorio tien
                 ▼                              ▼
        ┌────────────────┐             ┌─────────────────┐
        │   Repositories │             │      Cache      │
-       │     CRUD       │             │ Memory / Redis  │
+       │                │             │ Memory / Redis  │
        └───────┬────────┘             └─────────────────┘
                │
                ▼
@@ -139,7 +139,7 @@ Por ejemplo:
 
 ---
 
-# 📁 Estructura del proyecto
+# Estructura del proyecto
 
 Una estructura aproximada del proyecto es:
 
@@ -150,25 +150,27 @@ ServiceRemote/
 │   └── IJsonPlaceholderApi.cs
 │
 ├── Cache/
+|   ├── IDistributedCache.cs
 │   ├── IUserCache.cs
 │   ├── IUserCacheKeyProvider.cs
 │   ├── RedisUserCacheKeyProvider.cs
 │   └── UserCacheService.cs
 │
 ├── Config/
-│   └── Configuración de la aplicación
+|   ├── AppUserConfig.cs
+│   └── ConfigRedis.cs
 │
 ├── Controller/
 │   └── UserController.cs
 │
 ├── Decorator/
-│   └── Configuración de caché
+│   └── WebAplicationOptionCacheExtension
 │
 ├── Dto/
 │   ├── UserCreateDto.cs
 │   ├── UserResponseDto.cs
-│   ├── UserUpdateDto.cs
-│   └── User*ExtensionMapper.cs
+│   ├── UserResponseExtensionMapper.cs
+│   └── UserUpdateDto.cs 
 │
 ├── Entity/
 │   ├── AppDbContext.cs
@@ -207,22 +209,42 @@ ServiceRemote/
 ├── Validations/
 │   └── IUserValidator.cs
 │
-├── DependencyInjection/
-│   └── Configuración de dependencias
+├── Infraestructure/
+│   └── DependenciesProvider.cs
 │
 ├── Test/
-│   ├── Mapper
-│   ├── Repository
-│   ├── Cache
-│   └── Notifications
+│   └── Test con Bruno
 │
 ├── Program.cs
+├── Docker-compose.yaml
 └── appsettings.json
+
+ServiceRemote.Test/
+│
+├── Mapper
+│   └── UserDtoExtensionMapperTests.cs
+├── Repository
+│   └── CrudRepositoryIntegrationTest.cs
+├── Cache
+│   └── UserCacheService_Test.cs
+├── Errors
+│   ├── DomainErrorExtensionsTests.cs
+│   ├── DomainErrorsTests.cs
+│   └── UserDomainErrorTests.cs
+└── Notifications
+│   ├── NotificationObserberServiceTest.cs
+│   └── NotificationServiceTest.cs
+├── Api.Test
+│   └── JSonPlaceholderApiTest.cs
+├── Services.Test
+│   └── UserServiceTet.cs
+├── ValidatorsTest.Test
+│   └── UserValidatorTest.cs
 ```
 
 ---
 
-# 📂 Capas y directorios
+# Capas y directorios
 
 ## `Models`
 
@@ -233,7 +255,6 @@ Actualmente el modelo principal es:
 ```text
 User
 ```
-
 Representa un usuario de forma independiente de cómo se almacena en la base de datos o de cómo se expone mediante HTTP.
 
 Esto permite evitar que el modelo utilizado internamente tenga que ser exactamente igual que el modelo de persistencia o los DTOs.
@@ -285,11 +306,11 @@ También contiene reglas globales, como el filtro:
 IsDeleted == false
 ```
 
-De esta manera, los usuarios eliminados lógicamente no aparecen en las consultas normales.
+De esta manera, los usuarios eliminados lógicamente no aparecen en las consultas normales, aunque esta opción finalmente no ha visto la luz. Se añadirá a futuras actuaizaciones.
 
 ---
 
-# 📦 DTO
+# DTO
 
 El directorio `Dto` contiene los **Data Transfer Objects**.
 
@@ -298,7 +319,7 @@ Dto/
 ├── UserCreateDto
 ├── UserUpdateDto
 ├── UserResponseDto
-└── Mappers
+└── UserDtoExtensionMapper
 ```
 
 Se utilizan DTOs diferentes para las distintas operaciones:
@@ -356,7 +377,7 @@ La utilización de mappers evita realizar manualmente estas conversiones dentro 
 
 ---
 
-# 🗄️ Repositories
+# Repositories
 
 El directorio `Repositories` contiene la lógica de acceso a la base de datos.
 
@@ -414,7 +435,7 @@ Esto permite disponer de un punto específico para el usuario si posteriormente 
 
 ---
 
-# ⚙️ Services
+# Services
 
 El directorio `Services` contiene la **lógica de negocio**.
 
@@ -482,7 +503,7 @@ Por tanto, el servicio funciona como el punto donde se decide **qué debe ocurri
 
 ---
 
-# 🌐 Controllers
+# Controllers
 
 El controlador expone las operaciones mediante HTTP.
 
@@ -520,7 +541,7 @@ Por ejemplo, al recibir un `GET`, el controlador llama al servicio y transforma 
 
 ---
 
-# ❌ Errors
+# Errors
 
 El directorio `Errors` centraliza los errores relacionados con el dominio.
 
@@ -577,7 +598,7 @@ Error de dominio → HTTP
 
 ---
 
-# 💾 Cache
+# Cache
 
 El directorio `Cache` contiene la lógica de caché.
 
@@ -638,7 +659,7 @@ La caché permite:
 
 ---
 
-# 🌐 API
+# API
 
 El directorio `API` contiene la comunicación con la API REST externa.
 
@@ -670,7 +691,7 @@ De esta manera, la implementación externa puede cambiar sin tener que modificar
 
 ---
 
-# 🔔 Notifications
+# Notifications
 
 El sistema de notificaciones utiliza **System.Reactive** y el patrón:
 
@@ -742,7 +763,7 @@ Esto permite desacoplar la generación de eventos de la forma en la que estos ev
 
 ---
 
-# ✅ Validations
+# Validations
 
 El directorio `Validations` contiene las reglas relacionadas con la validación de los datos recibidos.
 
@@ -758,7 +779,7 @@ Separar la validación de los controladores y servicios evita que estas comproba
 
 ---
 
-# 🔄 Sync
+# Sync
 
 El directorio `Sync` contiene el servicio encargado de la **sincronización periódica con la API externa**.
 
@@ -791,7 +812,7 @@ Este proceso se ejecuta en segundo plano y no bloquea las peticiones HTTP normal
 
 ---
 
-# 💉 Dependency Injection
+# Dependency Injection
 
 El proyecto utiliza **inyección de dependencias** para conectar las diferentes capas.
 
@@ -830,7 +851,7 @@ La configuración de estas dependencias se concentra en el directorio destinado 
 
 ---
 
-# 🧪 Test
+# Test
 
 El directorio `Test` contiene las pruebas del proyecto.
 
@@ -919,7 +940,7 @@ Entre las situaciones comprobadas se encuentran:
 
 ---
 
-# 🧪 Bruno
+# Bruno
 
 Además de las pruebas automatizadas del proyecto, existe una carpeta destinada a las pruebas realizadas con **Bruno**.
 
@@ -940,7 +961,7 @@ La diferencia respecto a las pruebas unitarias es que Bruno permite comprobar el
 
 ---
 
-# 🔁 Flujo de una petición
+# Flujo de una petición
 
 ## GET por ID
 
@@ -992,7 +1013,7 @@ El objetivo es utilizar primero las fuentes más rápidas y evitar acceder innec
 
 ---
 
-# ➕ Flujo de creación
+# Flujo de creación
 
 Una creación sigue conceptualmente:
 
@@ -1027,7 +1048,7 @@ El servicio coordina las diferentes operaciones y devuelve un `Result` indicando
 
 ---
 
-# ✏️ Flujo de actualización
+# Flujo de actualización
 
 ```text
 Cliente
@@ -1053,7 +1074,7 @@ Cliente
 
 ---
 
-# 🗑️ Flujo de eliminación
+# Flujo de eliminación
 
 La eliminación se gestiona desde el servicio y posteriormente se actualizan las diferentes fuentes implicadas.
 
@@ -1070,7 +1091,7 @@ El `DbContext` utiliza un filtro global para que estos registros no aparezcan en
 
 ---
 
-# 🔄 Sincronización
+# Sincronización
 
 La sincronización periódica tiene como objetivo que la información local no quede desactualizada respecto a la API remota.
 
@@ -1101,7 +1122,7 @@ Al centralizar este proceso en un `BackgroundService`, las peticiones HTTP no ti
 
 ---
 
-# 🧩 Separación Model / Entity / DTO
+# Separación Model / Entity / DTO
 
 Una de las decisiones importantes del proyecto es no utilizar una única clase `User` para todo.
 
@@ -1137,7 +1158,7 @@ Esto permite modificar la estructura de la base de datos o de la API pública si
 
 ---
 
-# 🎯 ¿Por qué utilizar esta arquitectura?
+# ¿Por qué utilizar esta arquitectura?
 
 La principal razón es **separar responsabilidades**.
 
@@ -1177,7 +1198,7 @@ cada componente tiene una función concreta.
 
 ---
 
-# 📊 Responsabilidad de cada directorio
+# Responsabilidad de cada directorio
 
 | Directorio            | Responsabilidad                             |
 | --------------------- | ------------------------------------------- |
@@ -1198,7 +1219,7 @@ cada componente tiene una función concreta.
 
 ---
 
-# 🛠️ Tecnologías utilizadas
+# Tecnologías utilizadas
 
 | Tecnología                     | Uso                                       |
 | ------------------------------ | ----------------------------------------- |
@@ -1218,7 +1239,7 @@ cada componente tiene una función concreta.
 
 ---
 
-# 📌 Principios aplicados
+# Principios aplicados
 
 El proyecto intenta aplicar varios principios habituales en el desarrollo backend:
 
@@ -1256,7 +1277,7 @@ La separación por capas permite probar individualmente mappers, repositorios, c
 
 ---
 
-# 🚀 Resumen de la arquitectura
+# Resumen de la arquitectura
 
 El funcionamiento general puede resumirse así:
 
