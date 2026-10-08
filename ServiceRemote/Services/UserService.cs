@@ -35,7 +35,8 @@ public class UserService : IUserService
     {
         try
         {
-            var users = await _repository.GetAll();
+            var users = await _repository.GetAllAsync();
+            
             return Result.Success<IEnumerable<UserResponseDto>, UserDomainError>(
                 users.Select(user => user.ToDto()));
         }
@@ -56,7 +57,7 @@ public class UserService : IUserService
                 return Result.Success<UserResponseDto, UserDomainError>(cachedUser.ToDto());
             }
 
-            var user = await _repository.GetById(id);
+            var user = await _repository.GetByIdAsync(id);
             if (user is null)
             {
                 return await NotifyAndReturnNotFoundFailure<UserResponseDto>(id);
@@ -76,7 +77,7 @@ public class UserService : IUserService
     {
         try
         {
-            var user = await _repository.Create(obj.ToModel());
+            var user = await _repository.CreateAsync(obj.ToModel());
             var dto = user.ToDto();
 
             await _cache.SetAsync(user);
@@ -95,13 +96,13 @@ public class UserService : IUserService
     {
         try
         {
-            var existingUser = await _repository.GetById(obj.Id);
+            var existingUser = await _repository.GetByIdAsync(obj.Id);
             if (existingUser is null)
             {
                 return await NotifyAndReturnNotFoundFailure<UserResponseDto>(obj.Id);
             }
 
-            var user = await _repository.Update(obj.ToModel());
+            var user = await _repository.UpdateAsync(obj.ToModel());
             var dto = user.ToDto();
 
             await _cache.SetAsync(user);
@@ -116,27 +117,34 @@ public class UserService : IUserService
     }
 
     /// <inheritdoc />
-    public async Task<Result<IEnumerable<UserResponseDto>, UserDomainError>> Delete(int id)
+    public async Task<UnitResult<UserDomainError>> Delete(int id)
     {
         try
         {
-            var existingUser = await _repository.GetById(id);
-            if (existingUser is null)
+            var existingEntity = await _repository.GetByIdAsync(id);
+            if (existingEntity is null)
             {
-                return await NotifyAndReturnNotFoundFailure<IEnumerable<UserResponseDto>>(id);
+                return await NotifyAndReturnNotFoundUnitFailure(id);
             }
-
-            await _repository.Delete(id);
+            var existingUser = existingEntity.ToModel();
+            
+            await _repository.DeleteAsync(id);
+            
             await _cache.RemoveAsync(id.ToString());
+            
             await _notificador.NotifyDeleted(existingUser.ToDto());
-
-            var users = await _repository.GetAll();
-            return Result.Success<IEnumerable<UserResponseDto>, UserDomainError>(
-                users.Select(user => user.ToDto()));
+            
+            return UnitResult.Success<UserDomainError>();
         }
         catch (Exception ex)
         {
-            return await NotifyAndReturnStorageFailure<IEnumerable<UserResponseDto>>(ex);
+            _logger.LogError(ex, "Error de almacenamiento en el servicio de usuarios");
+
+            var error = DomainErrors.Storage(ex);
+
+            await _notificador.NotifyError(error);
+
+            return UnitResult.Failure<UserDomainError>(error);
         }
     }
 
@@ -146,6 +154,14 @@ public class UserService : IUserService
         await _notificador.NotifyError(error);
 
         return Result.Failure<T, UserDomainError>(error);
+    }
+    
+    private async Task<UnitResult<UserDomainError>> NotifyAndReturnNotFoundUnitFailure(int id)
+    {
+        var error = DomainErrors.NotFound(id);
+        await _notificador.NotifyError(error);
+
+        return UnitResult.Failure<UserDomainError>(error);
     }
 
     private async Task<Result<T, UserDomainError>> NotifyAndReturnStorageFailure<T>(Exception ex)

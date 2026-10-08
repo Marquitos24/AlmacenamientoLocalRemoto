@@ -63,15 +63,4 @@ public class UserController(UserService service) : ControllerBase
             onSuccess: () => NoContent(),
             onFailure: error => error.ToHttpResult<object>());
     }
-    
-    /*
-     * [HttpGet("export")]
-    public async Task<ActionResult<UserResponseDto>> Export()
-    {
-        var resultado = await service.Export(id);
-        return resultado.Match(
-            onSuccess: user => Ok(user),
-            onFailure: error => error.ToHttpResult<UserResponseDto>());
-    }
-     */
 }

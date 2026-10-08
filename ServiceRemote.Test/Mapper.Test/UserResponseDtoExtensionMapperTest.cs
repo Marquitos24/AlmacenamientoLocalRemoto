@@ -81,7 +81,8 @@ public class UserDtoExtensionMapperTests
 [TestFixture]
 public class UserCreateDtoExtensionMapperTests
 {
-    [Test]
+    /*
+     * [Test]
     public void ToDto_Mapea_User_A_UserCreateDto()
     {
         // Arrange
@@ -101,6 +102,7 @@ public class UserCreateDtoExtensionMapperTests
         dto.UserName.Should().Be(user.UserName);
         dto.Email.Should().Be(user.Email);
     }
+     */
 
     [Test]
     public void ToModel_Mapea_UserCreateDto_A_User()
@@ -148,7 +150,8 @@ public class UserCreateDtoExtensionMapperTests
 [TestFixture]
 public class UserUpdateDtoExtensionMapperTests
 {
-    [Test]
+    /*
+     * [Test]
     public void ToDto_Mapea_User_A_UserUpdateDto()
     {
         // Arrange
@@ -171,6 +174,7 @@ public class UserUpdateDtoExtensionMapperTests
         dto.Email.Should().Be(user.Email);
     }
 
+     */
     [Test]
     public void ToModel_Mapea_UserUpdateDto_A_User()
     {

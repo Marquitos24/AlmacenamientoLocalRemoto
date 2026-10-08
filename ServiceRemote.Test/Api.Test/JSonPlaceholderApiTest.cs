@@ -74,7 +74,6 @@ public class JSonPlaceholderApiTest
     {
         var createDto = new UserCreateDto
         {
-            Id = 11,
             Name = "Nuevo usuario",
             UserName = "nuevo",
             Email = "nuevo@example.com"
@@ -174,7 +173,6 @@ public class JSonPlaceholderApiTest
     {
         var createDto = new UserCreateDto
         {
-            Id = 1,
             Name = "Usuario",
             UserName = "usuario",
             Email = "usuario@example.com"
