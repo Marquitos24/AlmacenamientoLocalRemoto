@@ -1,8 +1,8 @@
-﻿using CSharpFunctionalExtensions;
+using CSharpFunctionalExtensions;
+using Microsoft.Extensions.Logging;
 using ServiceRemote.Cache;
 using ServiceRemote.Dto;
 using ServiceRemote.Errors;
-using ServiceRemote.Models;
 using ServiceRemote.Notifications.Emiter;
 using ServiceRemote.Repositories;
 
@@ -13,46 +13,148 @@ namespace ServiceRemote.Services;
 /// </summary>
 public class UserService : IUserService
 {
-    private IUserCache _cache;
-    private IUserRepository _repository;
-    private ILogger _logger;
-    private INotificationService<UserResponseDto, UserDomainError> _notificador;
-    
-    public UserService(IUserCache cache,IUserRepository repository, ILogger logger, INotificationService<UserResponseDto,UserDomainError> notificador)
+    private readonly IUserCache _cache;
+    private readonly IUserRepository _repository;
+    private readonly ILogger _logger;
+    private readonly INotificationService<UserResponseDto, UserDomainError> _notificador;
+
+    public UserService(
+        IUserCache cache,
+        IUserRepository repository,
+        ILogger logger,
+        INotificationService<UserResponseDto, UserDomainError> notificador)
     {
         _cache = cache;
         _repository = repository;
         _logger = logger;
         _notificador = notificador;
     }
-    
-    /// <inehritdoc />
-    public Task<Result<IEnumerable<UserResponseDto>, UserDomainError>> GetAll()
+
+    /// <inheritdoc />
+    public async Task<Result<IEnumerable<UserResponseDto>, UserDomainError>> GetAll()
     {
-        throw new NotImplementedException();
+        try
+        {
+            var users = await _repository.GetAll();
+            return Result.Success<IEnumerable<UserResponseDto>, UserDomainError>(
+                users.Select(user => user.ToDto()));
+        }
+        catch (Exception ex)
+        {
+            return await NotifyAndReturnStorageFailure<IEnumerable<UserResponseDto>>(ex);
+        }
     }
 
-    /// <inehritdoc />
-    public Task<Result<UserResponseDto, UserDomainError>> GetById(int id)
+    /// <inheritdoc />
+    public async Task<Result<UserResponseDto, UserDomainError>> GetById(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var cachedUser = await _cache.GetAsync(id.ToString());
+            if (cachedUser is not null)
+            {
+                return Result.Success<UserResponseDto, UserDomainError>(cachedUser.ToDto());
+            }
+
+            var user = await _repository.GetById(id);
+            if (user is null)
+            {
+                return await NotifyAndReturnNotFoundFailure<UserResponseDto>(id);
+            }
+
+            await _cache.SetAsync(user);
+            return Result.Success<UserResponseDto, UserDomainError>(user.ToDto());
+        }
+        catch (Exception ex)
+        {
+            return await NotifyAndReturnStorageFailure<UserResponseDto>(ex);
+        }
     }
 
-    /// <inehritdoc />
-    public Task<Result<UserResponseDto, UserDomainError>> Create(UserCreateDto obj)
+    /// <inheritdoc />
+    public async Task<Result<UserResponseDto, UserDomainError>> Create(UserCreateDto obj)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var user = await _repository.Create(obj.ToModel());
+            var dto = user.ToDto();
+
+            await _cache.SetAsync(user);
+            await _notificador.NotifyCreated(dto);
+
+            return Result.Success<UserResponseDto, UserDomainError>(dto);
+        }
+        catch (Exception ex)
+        {
+            return await NotifyAndReturnStorageFailure<UserResponseDto>(ex);
+        }
     }
 
-    /// <inehritdoc />
-    public Task<Result<UserResponseDto, UserDomainError>> Update(UserUpdateDto obj)
+    /// <inheritdoc />
+    public async Task<Result<UserResponseDto, UserDomainError>> Update(UserUpdateDto obj)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var existingUser = await _repository.GetById(obj.Id);
+            if (existingUser is null)
+            {
+                return await NotifyAndReturnNotFoundFailure<UserResponseDto>(obj.Id);
+            }
+
+            var user = await _repository.Update(obj.ToModel());
+            var dto = user.ToDto();
+
+            await _cache.SetAsync(user);
+            await _notificador.NotifyUpdated(dto);
+
+            return Result.Success<UserResponseDto, UserDomainError>(dto);
+        }
+        catch (Exception ex)
+        {
+            return await NotifyAndReturnStorageFailure<UserResponseDto>(ex);
+        }
     }
 
-    /// <inehritdoc />
-    public Task<UnitResult<UserDomainError>> Delete(int id)
+    /// <inheritdoc />
+    public async Task<Result<IEnumerable<UserResponseDto>, UserDomainError>> Delete(int id)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var existingUser = await _repository.GetById(id);
+            if (existingUser is null)
+            {
+                return await NotifyAndReturnNotFoundFailure<IEnumerable<UserResponseDto>>(id);
+            }
+
+            await _repository.Delete(id);
+            await _cache.RemoveAsync(id.ToString());
+            await _notificador.NotifyDeleted(existingUser.ToDto());
+
+            var users = await _repository.GetAll();
+            return Result.Success<IEnumerable<UserResponseDto>, UserDomainError>(
+                users.Select(user => user.ToDto()));
+        }
+        catch (Exception ex)
+        {
+            return await NotifyAndReturnStorageFailure<IEnumerable<UserResponseDto>>(ex);
+        }
+    }
+
+    private async Task<Result<T, UserDomainError>> NotifyAndReturnNotFoundFailure<T>(int id)
+    {
+        var error = DomainErrors.NotFound(id);
+        await _notificador.NotifyError(error);
+
+        return Result.Failure<T, UserDomainError>(error);
+    }
+
+    private async Task<Result<T, UserDomainError>> NotifyAndReturnStorageFailure<T>(Exception ex)
+    {
+        _logger.LogError(ex, "Error de almacenamiento en el servicio de usuarios");
+
+        var error = DomainErrors.Storage(ex);
+        await _notificador.NotifyError(error);
+
+        return Result.Failure<T, UserDomainError>(error);
     }
 }
